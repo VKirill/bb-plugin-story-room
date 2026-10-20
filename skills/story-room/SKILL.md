@@ -5,7 +5,7 @@ description: The BB panel «Сценарная» (plugin story-room) over a stor
 
 # Сценарная (story-room)
 
-The panel lives at `/plugins/story-room/story`. It shows the story repo set in the plugin settings (`bb plugin config story-room`: `repo`, `host`, `project`, `provider`, `model`).
+The panel lives at `/plugins/story-room/story`. It shows the story repo set in the plugin settings (`bb plugin config story-room`: `repo`, `host`, `project`; the models of the roles are in `story/_room/models.yaml` `threads`, editable in the plugin settings).
 
 ## Where its data comes from
 Everything about the story comes from the repo itself. The plugin's host entry runs `node tools/story/room.ts <command>` in the repo:
@@ -21,3 +21,4 @@ If the panel shows something wrong, fix the repo: the text, the canon or `tools/
 - **Бриф** opens `tools/story/brief.ts <case>`.
 - **Новая глава**, **Исправить** and **Обсудить** start a visible chat for the agent in `<repo>/story`. That folder is the BB section «Сценарная», whose `AGENTS.md` holds the showrunner prompt. The first message names the file and the task. The chat carries plugin metadata `{file, task}`, so the text's page lists it under «Обсуждения».
 - **Новая история** starts a chat that plans a story of 1–5 seasons by the `mea-culpa-story` skill.
+- **Worker threads.** `bb plugin rpc call story-room worker --input-file <json>` takes `{role, files, job, title, prompt}`. It spawns a hidden thread in `<repo>/story` with the role's model. Wait for it with `bb thread wait`, then read it with `bb thread output`. `tools/story/chain.ts` drives the critic → editor → judge chain this way.

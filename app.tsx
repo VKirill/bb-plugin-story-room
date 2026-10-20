@@ -227,6 +227,41 @@ function TextView({ rpc, file, open, chats }: { rpc: Rpc; file: string; open: (s
   );
 }
 
+/** Roles of the agent threads, as the owner reads them. */
+const ROLE: Record<string, string> = { showrunner: "шоураннер", critic: "критик", checker: "проверка", editor: "редактор", judge: "судья", discuss: "обсуждение", chapter: "новая глава", fix: "правка", story: "новая история" };
+
+/** Settings: which model plays which role (story/_room/models.yaml `threads`), from the providers BB has on the repo's host. */
+function ModelsSettings() {
+  const rpc = useRpc<typeof rpcContract>();
+  const { data, error, reload } = useLoad<{ roles: Record<string, string>; providers: { id: string; name: string; models: { id: string; name: string }[] }[] }>(() => rpc.call("models", null), [rpc]);
+  const save = async (role: string, spec: string) => {
+    try { await rpc.call("models_set", { role, spec }); toast.success(`${ROLE[role] ?? role}: ${spec}`); reload(); } catch (e) { toast.error(errorText(e)); }
+  };
+  if (error) return <p role="alert" className="text-sm text-destructive">{error}</p>;
+  if (!data) return <Empty>Загружаю…</Empty>;
+  return (
+    <div className="space-y-3">
+      <p className="text-xs text-muted-foreground">Каждая роль — тред BB на этой модели по подписке. Цепочка правки: критик пишет ТЗ, редактор правит файл по ТЗ, судья принимает или откатывает; шоураннер ведёт чаты из панели. Хранится в story/_room/models.yaml.</p>
+      {Object.entries(data.roles).map(([role, spec]) => {
+        const [provider, model] = spec.split("/");
+        const models = data.providers.find((p) => p.id === provider)?.models ?? [];
+        return (
+          <div key={role} className="flex flex-wrap items-center gap-2 text-sm">
+            <span className="w-28 font-medium">{ROLE[role] ?? role}</span>
+            <select aria-label={`Провайдер: ${ROLE[role] ?? role}`} className="sr-raised rounded-md bg-transparent px-2 py-1" value={provider} onChange={(e) => { const m = data.providers.find((p) => p.id === e.target.value)?.models[0]; if (m) save(role, `${e.target.value}/${m.id}`); }}>
+              {data.providers.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+            </select>
+            <select aria-label={`Модель: ${ROLE[role] ?? role}`} className="sr-raised rounded-md bg-transparent px-2 py-1" value={model} onChange={(e) => save(role, `${provider}/${e.target.value}`)}>
+              {models.some((m) => m.id === model) ? null : <option value={model}>{model}</option>}
+              {models.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
+            </select>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 function ChatList({ chats }: { chats: Chat[] }) {
   const navigate = useBbNavigate();
   if (!chats.length) return <p className="text-sm text-muted-foreground">Пока нет. Кнопки «Обсудить», «Новая глава» и «Исправить» открывают чат агента «Сценарной».</p>;
@@ -236,6 +271,7 @@ function ChatList({ chats }: { chats: Chat[] }) {
         <li key={c.id}>
           <button type="button" onClick={() => navigate.toThread(c.id)} className="flex w-full items-center gap-2 py-2 text-left text-sm hover:text-foreground">
             <Icon name="MessageSquare" className="size-4 text-muted-foreground" />
+            {c.task && ROLE[c.task] ? <span className={cn("sr-pill", c.hidden ? "sr-pill-muted" : "sr-pill-info")}>{ROLE[c.task]}</span> : null}
             <span className="min-w-0 flex-1 truncate">{c.title}</span>
             {c.file ? <span className="hidden truncate font-mono text-xs text-muted-foreground md:inline">{c.file}</span> : null}
             <span className="font-mono text-xs tabular-nums text-muted-foreground">{new Date(c.createdAt).toLocaleDateString()}</span>
@@ -314,6 +350,8 @@ const ACTIONS = [
   { action: "style", label: "Стиль", icon: "Palette" },
   { action: "i18n", label: "Переводы", icon: "Globe" },
   { action: "test", label: "Тесты", icon: "Beaker" },
+  { action: "chain", label: "Цепочка правки", icon: "EditFile" },
+  { action: "continuity", label: "Непрерывность картотеки", icon: "SecurityCheck" },
 ] as const;
 
 function RunsView({ rpc, open }: { rpc: Rpc; open: (sub: string) => void }) {
@@ -475,5 +513,6 @@ function StoryRoom({ subPath }: { subPath: string }) {
 }
 
 export default definePluginApp((app) => {
+  app.slots.settingsSection({ id: "models", title: "Модели агентов", description: "Какая модель из подписок BB играет какую роль.", component: ModelsSettings });
   app.slots.navPanel({ id: "story", title: "Сценарная", icon: "story-room/pen", path: PATH, component: StoryRoom });
 });

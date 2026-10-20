@@ -48,4 +48,4 @@ export type Canon = {
 };
 
 export type Run = { id: string; action: string; only: string | null; started: string; done: boolean; code: number | null; tail: string[] };
-export type Chat = { id: string; title: string; status: string; file: string | null; task: string | null; createdAt: number };
+export type Chat = { id: string; title: string; status: string; file: string | null; files: string[]; task: string | null; job: string | null; hidden: boolean; createdAt: number };

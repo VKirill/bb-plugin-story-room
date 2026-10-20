@@ -9,9 +9,17 @@ A BB panel for a writers' room. It reads a story repo laid out like the `story/`
 
 Buttons on a text: **Проверить**, **Бриф**, **Новая глава**, **Исправить**, **Обсудить**. On the overview: **Новая история**. A chat starts in `<repo>/story`, so the agent reads that folder's `AGENTS.md`.
 
+## Agent threads and models
+
+Every model call of the story room is a BB thread on a subscription, so the whole history stays readable:
+
+- **Panel chats** (Обсудить, Новая глава, Исправить, Новая история) open a visible thread for the role `showrunner`.
+- **The editing chain** of the repo (`tools/story/chain.ts`) asks the plugin for hidden worker threads through the RPC `worker`. A critic writes a brief, an editor edits the files by the brief, and a judge accepts or sends back. A checker covers continuity. Each worker thread carries `{files, job, task}` metadata, so a text's page lists every step under «Обсуждения» with its role.
+- **Which model plays which role** is set in Settings → Сценарная → «Модели агентов». The list offers the providers and models BB has on the repo's host. The choice is stored in the repo, in `story/_room/models.yaml` under `threads`.
+
 ## How it works
 
-The plugin knows nothing about the story format. Its host entry runs the repo's own `node tools/story/room.ts <command>` on the machine that holds the repo and passes the JSON on. The commands are `tree`, `read`, `canon`, `brief`, `run`, `runs` and `log`. The server relays these calls and starts chats with `bb.sdk.threads.spawn`.
+The plugin knows nothing about the story format. Its host entry runs the repo's own `node tools/story/room.ts <command>` on the machine that holds the repo and passes the JSON on. The commands are `tree`, `read`, `canon`, `brief`, `run`, `runs`, `log`, `models` and `models-set`. The server relays these calls and starts chats with `bb.sdk.threads.spawn`.
 
 ## Install
 
@@ -20,7 +28,6 @@ bb plugin install <path or git URL> --yes
 bb plugin config story-room set repo /absolute/path/to/repo
 bb plugin config story-room set host <host id>        # bb host list
 bb plugin config story-room set project <project id>
-bb plugin config story-room set model claude-opus-5-5 # optional; empty = provider default
 ```
 
 ## Develop

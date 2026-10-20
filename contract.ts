@@ -3,7 +3,7 @@ import { defineRpcContract } from "@get-bb/plugin-sdk";
 import { z } from "zod";
 
 /** Room commands the server may ask for; the script itself validates the rest. */
-export const ROOM_COMMANDS = ["tree", "read", "canon", "brief", "run", "runs", "log"] as const;
+export const ROOM_COMMANDS = ["tree", "read", "canon", "brief", "run", "runs", "log", "models", "models-set"] as const;
 
 export const hostContract = defineRpcContract({
   room: {
