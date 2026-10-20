@@ -1,0 +1,221 @@
+/*
+ * Pokecut plugin kit: the brand layer for BB-сервис plugin screens.
+ * Rules: docs/DESIGN.md. Reference implementation: plugins/bb-plugin-lane-pilot/app.css.
+ *
+ * Copy into the plugin's app.css after the Tailwind imports, then replace
+ *   story-room -> the plugin id from package.json (bb.id), e.g. lane-pilot
+ *   sr-  -> a short plugin prefix, e.g. lp-
+ * The prefix matters: these classes are not scoped by the build, so two
+ * plugins with the same class name would style each other's screens.
+ *
+ * The --sr-* tokens read the Pokecut theme's --pk-* tokens and fall back to
+ * BB's own palette, so the screen stays tidy under any BB theme, light or dark.
+ * Radii: 8px rows, buttons, inputs; 6px segments in a 9px track; 12px inner
+ * cards; 14px single cards and the header strip; 16px panels; 20px dialogs.
+ * Rules sit in the components layer, so a Tailwind utility on an element wins.
+ */
+
+[data-bb-plugin="story-room"],
+[data-bb-plugin-root]:not([data-bb-plugin]) {
+  --sr-well: var(--pk-well, color-mix(in oklab, var(--muted) 45%, var(--card)));
+  --sr-card: var(--pk-card, var(--card));
+  --sr-outline: var(--pk-outline, var(--input));
+  --sr-hairline: var(--pk-hairline, var(--border));
+  --sr-drop: var(--pk-drop, 0 1px 2px rgb(0 0 0 / 0.06));
+  --sr-card-drop: var(--pk-card-drop, none);
+  --sr-raise: 0 1px 3px 0 rgb(0 0 0 / 0.12);
+  --sr-accent: var(--pk-accent-gradient, linear-gradient(var(--primary), var(--primary)));
+  --sr-accent-edge: var(--pk-accent-edge, none);
+  --sr-success: var(--success, #3fae4a);
+  --sr-success-text: var(--diff-added, #2f8a45);
+  --sr-info: var(--timeline-accent, #3e7be8);
+  --sr-warning: var(--warning, #e8a33d);
+  --sr-warning-text: var(--warning-text, #b4540f);
+  --sr-danger-text: var(--destructive-text, var(--destructive));
+}
+
+@layer components {
+  /* Nested card: a gray well frames a header line and the white body card. */
+  .sr-panel {
+    min-width: 0;
+    max-width: 100%;
+    padding: 4px;
+    border: 1px solid var(--sr-hairline);
+    border-radius: 16px;
+    background-color: var(--sr-well);
+    box-shadow: var(--sr-card-drop);
+  }
+
+  .sr-panel-head {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+  }
+
+  .sr-panel-body {
+    min-width: 0;
+    max-width: 100%;
+    padding: 12px;
+    border: 1px solid var(--sr-hairline);
+    border-radius: 12px;
+    background-color: var(--sr-card);
+    box-shadow: var(--sr-drop);
+  }
+
+  /* A single white card, for blocks that need no header well. */
+  .sr-card {
+    min-width: 0;
+    border: 1px solid var(--sr-hairline);
+    border-radius: 14px;
+    background-color: var(--sr-card);
+    box-shadow: var(--sr-drop);
+  }
+
+  /* Page header strip: a quiet well holding the title and page actions. */
+  .sr-strip {
+    min-width: 0;
+    padding: 10px 14px;
+    border: 1px solid var(--sr-hairline);
+    border-radius: 14px;
+    background-color: var(--sr-well);
+  }
+
+  /* Raised white surface: secondary buttons, inputs on a well, chips. */
+  .sr-raised {
+    border: 1px solid var(--sr-outline);
+    background-color: var(--sr-card);
+    box-shadow: var(--sr-drop);
+  }
+
+  /* The one primary action of a screen or dialog. */
+  .sr-accent {
+    border-color: transparent;
+    background-color: var(--primary);
+    background-image: var(--sr-accent);
+    box-shadow: var(--sr-accent-edge);
+    color: #ffffff;
+  }
+
+  .sr-accent:hover:not(:disabled) {
+    filter: brightness(1.05) saturate(1.05);
+  }
+
+  /* Segmented control: a gray track, the chosen option raised in white. */
+  .sr-seg {
+    display: inline-flex;
+    max-width: 100%;
+    align-items: center;
+    gap: 2px;
+    padding: 3px;
+    border: 1px solid var(--sr-hairline);
+    border-radius: 9px;
+    background-color: var(--sr-well);
+  }
+
+  .sr-seg-item {
+    border-radius: 6px;
+    color: var(--muted-foreground);
+    font-weight: 500;
+  }
+
+  .sr-seg-item:hover {
+    color: var(--foreground);
+  }
+
+  .sr-seg-item:is([data-state="active"], [aria-pressed="true"]) {
+    background-color: var(--sr-card);
+    box-shadow: var(--sr-raise);
+    color: var(--foreground);
+    font-weight: 600;
+  }
+
+  /* Navigation rows: quiet until chosen; the chosen one is a raised pill. */
+  .sr-nav-item {
+    border-radius: 8px;
+    color: var(--muted-foreground);
+  }
+
+  .sr-nav-item:hover {
+    color: var(--foreground);
+  }
+
+  .sr-nav-item:is([aria-selected="true"], [aria-current="page"]) {
+    background-color: var(--sr-card);
+    box-shadow: inset 0 0 0 1px var(--sr-outline), var(--sr-drop);
+    color: var(--foreground);
+  }
+
+  /* Small square tile for an icon or status mark next to a title. */
+  .sr-tile {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--sr-outline);
+    border-radius: 9px;
+    background-color: var(--sr-card);
+    box-shadow: var(--sr-drop);
+  }
+
+  /* Apply to @bb/switch. */
+  .sr-switch[data-state="checked"] {
+    background-color: var(--primary);
+    background-image: var(--sr-accent);
+  }
+
+  .sr-switch[data-state="unchecked"] {
+    background-color: var(--sr-outline);
+  }
+
+  .sr-switch > span {
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.2);
+  }
+
+  /* «?» help mark: a 14px circle raised to the top of the title line. */
+  .sr-help {
+    display: inline-flex;
+    width: 14px;
+    height: 14px;
+    margin-left: 4px;
+    align-items: center;
+    justify-content: center;
+    vertical-align: top;
+    border: 1px solid var(--sr-outline);
+    border-radius: 9999px;
+    background-color: var(--sr-card);
+    color: var(--muted-foreground);
+    font-size: 9px;
+    font-weight: 600;
+    line-height: 1;
+  }
+
+  /* Status pills: fully rounded, soft tint, coloured text. */
+  .sr-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 9999px;
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .sr-pill-success { background-color: color-mix(in oklab, var(--sr-success) 14%, transparent); color: var(--sr-success-text); }
+  .sr-pill-info { background-color: color-mix(in oklab, var(--sr-info) 13%, transparent); color: var(--sr-info); }
+  .sr-pill-warning { background-color: color-mix(in oklab, var(--sr-warning) 16%, transparent); color: var(--sr-warning-text); }
+  .sr-pill-danger { background-color: color-mix(in oklab, var(--destructive) 12%, transparent); color: var(--sr-danger-text); }
+  .sr-pill-neutral { background-color: var(--sr-card); box-shadow: inset 0 0 0 1px var(--sr-outline); color: var(--foreground); }
+  .sr-pill-muted { background-color: color-mix(in oklab, var(--foreground) 7%, transparent); color: var(--foreground); }
+
+  .sr-text-success { color: var(--sr-success-text); }
+  .sr-text-warning { color: var(--sr-warning-text); }
+  .sr-text-danger { color: var(--sr-danger-text); }
+}
+
+/* Only a group's own arrow turns when it opens (an open parent must not turn the arrows of closed children). */
+details[open] > summary .sr-chev {
+  transform: rotate(90deg);
+}
