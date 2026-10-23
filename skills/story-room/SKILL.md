@@ -20,5 +20,5 @@ If the panel shows something wrong, fix the repo: the text, the canon or `tools/
 - **Проверить** runs `node tools/story/check.ts --only <unit>` for that text.
 - **Бриф** opens `tools/story/brief.ts <case>`.
 - **Новая глава**, **Исправить** and **Обсудить** start a visible chat for the agent in `<repo>/story`. That folder is the BB section «Сценарная», whose `AGENTS.md` holds the showrunner prompt. The first message names the file and the task. The chat carries plugin metadata `{file, task}`, so the text's page lists it under «Обсуждения».
-- **Новая история** starts a chat that plans a story of 1–5 seasons by the `mea-culpa-story` skill.
+- **Новая история** starts a chat that plans a story of 1–5 seasons by the `meaculpa-story` skill.
 - **Worker threads.** `bb plugin rpc call story-room worker --input-file <json>` takes `{role, files, job, title, prompt}`. It spawns a hidden thread in `<repo>/story` with the role's model. Wait for it with `bb thread wait`, then read it with `bb thread output`. `tools/story/chain.ts` drives the critic → editor → judge chain this way.

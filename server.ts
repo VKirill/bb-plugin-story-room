@@ -46,11 +46,11 @@ function prompt(task: Task, f: string | undefined, title: string | undefined, te
   const season = f?.match(/^([^/]+)\/seasons\/([^/]+)\//);
   switch (task) {
     case "chapter":
-      return `${at}\n\nНапиши главу книги сезона после дела \`${caseId}\` по процедуре скилла mea-culpa-story: \`npm run story:new -- chapter ${season?.[1]}/${season?.[2]} ${caseId} "<название>"\`, бриф \`npm run story:brief -- ${caseId}\`, писатель — субагент Opus с ролью \`_room/roles/writer.md\`, затем \`npm run story\` и \`npm run story:check -- --only season:${season?.[2]}:book:\`. Покажи главу и итог проверки.${ask}`;
+      return `${at}\n\nНапиши главу книги сезона после дела \`${caseId}\` по процедуре скилла meaculpa-story: \`npm run story:new -- chapter ${season?.[1]}/${season?.[2]} ${caseId} "<название>"\`, бриф \`npm run story:brief -- ${caseId}\`, писатель — субагент Opus с ролью \`_room/roles/writer.md\`, затем \`npm run story\` и \`npm run story:check -- --only season:${season?.[2]}:book:\`. Покажи главу и итог проверки.${ask}`;
     case "story":
-      return `Новая история. Проведи её по процедуре «A new story (1–5 seasons)» скилла mea-culpa-story: сначала спроси меня о замысле (жанр, время, место, сколько сезонов, кто рассказчик), потом предложи развязку всей истории и лестницу раскрытий по сезонам, и только после моего согласия создавай файлы.${ask}`;
+      return `Новая история. Проведи её по процедуре «A new story (1–5 seasons)» скилла meaculpa-story: сначала спроси меня о замысле (жанр, время, место, сколько сезонов, кто рассказчик), потом предложи развязку всей истории и лестницу раскрытий по сезонам, и только после моего согласия создавай файлы.${ask}`;
     case "fix":
-      return `${at}\n\nПроверка нашла расхождения с каноном в этом тексте. Проведи процедуру «A contradiction found» скилла mea-culpa-story: воспроизведи, реши, что верно (канон или текст), исправь минимально, перепроверь.${ask}`;
+      return `${at}\n\nПроверка нашла расхождения с каноном в этом тексте. Проведи процедуру «A contradiction found» скилла meaculpa-story: воспроизведи, реши, что верно (канон или текст), исправь минимально, перепроверь.${ask}`;
     default:
       return `${at}${ask || "\n\nРазберём этот текст: что в нём работает, что нет, что стоит проверить."}`;
   }
